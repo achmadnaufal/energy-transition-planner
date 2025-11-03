@@ -1,0 +1,1 @@
+"""Package: energy-transition-planner"""
