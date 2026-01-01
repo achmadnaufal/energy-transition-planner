@@ -49,4 +49,29 @@ MIT License — free to use, modify, and distribute.
 
 ## Usage Examples
 
+### Stranded Asset Risk Assessment
+
+```python
+from src.main import EnergyTransitionPlanner
+
+planner = EnergyTransitionPlanner()
+
+risk = planner.calculate_stranded_asset_risk(
+    asset_book_value_usd=500_000_000,   # $500M coal plant
+    remaining_life_years=25,
+    coal_demand_decline_pct_annual=4.0,
+    carbon_price_usd_per_tco2=50.0,
+    annual_emissions_tco2=800_000,
+)
+
+print(f"Risk score:        {risk['risk_score']:.1f}/100")
+print(f"Urgency:           {risk['transition_urgency']}")
+print(f"Stranding year:    {risk['stranding_year']}")
+print(f"Stranded value:   ${risk['stranded_value_usd']:,.0f}")
+print(f"Carbon liability: ${risk['carbon_liability_npv_usd']:,.0f}")
+# Risk score:        65.0/100
+# Urgency:           high
+# Stranding year:    13
+```
+
 Refer to the `tests/` directory for comprehensive example implementations.
