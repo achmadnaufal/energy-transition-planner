@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.0] - 2026-03-25
+
+### Added
+- **Renewable Capacity Optimizer** (`src/renewable_capacity_optimizer.py`) — coal-to-renewables transition capacity planning
+  - Six renewable technology profiles: Solar PV, Wind Onshore/Offshore, Hydro, Geothermal, Biomass
+  - Technology parameters from IRENA 2023: CapEx, OpEx, capacity factor, LCOE, construction time, grid stability index
+  - Configurable capacity buffer (default 20% overcapacity) for variable renewable energy variability
+  - RenewableMixComponent with annual generation (GWh), total CapEx, and LCOE per technology
+  - Weighted portfolio LCOE and grid stability index across the chosen mix
+  - Capacity adequacy ratio (renewable generation vs coal baseline)
+  - Phased milestone plan based on technology-specific construction times
+  - Automated warnings: capacity shortfall, low grid stability, high LCOE, timeline risk
+  - Multi-mix comparison sorted by weighted LCOE
+- Unit tests: 17 new tests in `tests/test_renewable_capacity_optimizer.py`
+
 ## [1.3.0] - 2026-03-23
 
 ### Added
