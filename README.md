@@ -45,3 +45,8 @@ energy-transition-planner/
 ## License
 
 MIT License — free to use, modify, and distribute.
+
+
+## Usage Examples
+
+Refer to the `tests/` directory for comprehensive example implementations.
