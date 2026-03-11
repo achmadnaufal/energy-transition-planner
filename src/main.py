@@ -58,6 +58,81 @@ class EnergyTransitionPlanner:
         self.validate(df)
         return self.analyze(df)
 
+    def compare_scenarios(self, scenarios: Dict[str, Dict]) -> pd.DataFrame:
+        """
+        Compare multiple energy transition scenarios side-by-side.
+        
+        Calculates key metrics and comparison indicators for scenario analysis:
+        - Coal capacity reduction percentage
+        - Renewable energy capacity growth
+        - Workforce transition impact
+        - Financial returns (NPV, capex efficiency)
+        - Timeline feasibility
+        
+        Args:
+            scenarios: Dictionary mapping scenario_id to scenario_data.
+                      Each scenario should contain capacity, financial, and timeline data.
+        
+        Returns:
+            DataFrame with side-by-side scenario comparison
+            
+        Raises:
+            ValueError: If scenarios dict is empty or missing required fields
+            
+        Example:
+            >>> scenarios = {
+            ...     "aggressive": {"coal_capacity_2035_mw": 500, "renewables_capacity_2035_mw": 4500, ...},
+            ...     "moderate": {"coal_capacity_2035_mw": 2000, "renewables_capacity_2035_mw": 3500, ...},
+            ... }
+            >>> comparison = planner.compare_scenarios(scenarios)
+            >>> print(comparison)  # Coal reduction %, NPV/CAPEX, worker transition rate, etc.
+        """
+        if not scenarios:
+            raise ValueError("scenarios dict cannot be empty")
+        
+        comparison_data = []
+        
+        for scenario_id, scenario_data in scenarios.items():
+            # Validate required fields
+            required_fields = ["coal_capacity_2026_mw", "coal_capacity_2035_mw", 
+                             "renewables_capacity_2026_mw", "renewables_capacity_2035_mw",
+                             "capex_billion_usd", "workers_transitioned"]
+            if not all(f in scenario_data for f in required_fields):
+                continue
+            
+            # Calculate comparison metrics
+            coal_reduction_pct = (
+                (scenario_data["coal_capacity_2026_mw"] - scenario_data["coal_capacity_2035_mw"]) 
+                / scenario_data["coal_capacity_2026_mw"] * 100
+            )
+            
+            renewables_growth_mw = (
+                scenario_data["renewables_capacity_2035_mw"] - scenario_data["renewables_capacity_2026_mw"]
+            )
+            
+            capex = scenario_data.get("capex_billion_usd", 0)
+            npv = scenario_data.get("npv_billion_usd", 0)
+            npv_capex_ratio = npv / capex if capex > 0 else 0
+            
+            workers = scenario_data.get("workers_transitioned", 0)
+            original_workers = 15000  # Assumed baseline
+            worker_transition_rate = workers / original_workers * 100
+            
+            comparison_data.append({
+                "scenario_id": scenario_id,
+                "scenario_name": scenario_data.get("scenario_name", scenario_id),
+                "coal_capacity_reduction_pct": round(coal_reduction_pct, 1),
+                "renewables_growth_mw": renewables_growth_mw,
+                "total_transition_capex_billion_usd": capex,
+                "npv_billion_usd": npv,
+                "npv_capex_ratio": round(npv_capex_ratio, 2),
+                "workers_transitioned": workers,
+                "worker_transition_rate_pct": round(worker_transition_rate, 1),
+                "timeline_years": scenario_data.get("timeline_years", 0),
+            })
+        
+        return pd.DataFrame(comparison_data)
+
     def to_dataframe(self, result: Dict) -> pd.DataFrame:
         """Convert analysis result to DataFrame for export."""
         rows = []

@@ -1,0 +1,43 @@
+{
+  "scenarios": [
+    {
+      "scenario_id": "conservative",
+      "scenario_name": "Conservative Transition",
+      "coal_capacity_2026_mw": 5000,
+      "coal_capacity_2035_mw": 3000,
+      "renewables_capacity_2026_mw": 500,
+      "renewables_capacity_2035_mw": 2500,
+      "capex_billion_usd": 2.5,
+      "opex_annual_million_usd": 150,
+      "workers_transitioned": 2000,
+      "timeline_years": 10,
+      "npv_billion_usd": 1.2
+    },
+    {
+      "scenario_id": "moderate",
+      "scenario_name": "Moderate Transition",
+      "coal_capacity_2026_mw": 5000,
+      "coal_capacity_2035_mw": 2000,
+      "renewables_capacity_2026_mw": 500,
+      "renewables_capacity_2035_mw": 3500,
+      "capex_billion_usd": 4.0,
+      "opex_annual_million_usd": 180,
+      "workers_transitioned": 3500,
+      "timeline_years": 10,
+      "npv_billion_usd": 2.1
+    },
+    {
+      "scenario_id": "aggressive",
+      "scenario_name": "Aggressive Transition",
+      "coal_capacity_2026_mw": 5000,
+      "coal_capacity_2035_mw": 500,
+      "renewables_capacity_2026_mw": 500,
+      "renewables_capacity_2035_mw": 4500,
+      "capex_billion_usd": 6.5,
+      "opex_annual_million_usd": 220,
+      "workers_transitioned": 4500,
+      "timeline_years": 10,
+      "npv_billion_usd": 3.5
+    }
+  ]
+}
