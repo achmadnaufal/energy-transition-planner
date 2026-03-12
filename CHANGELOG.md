@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.5.0] - 2026-03-26
+
+### Added
+- **JustTransitionImpactAssessor** (`src/just_transition_assessor.py`) — ILO/World Bank just transition framework implementation
+  - Three transition speed scenarios: GRADUAL (18yr), MODERATE (10yr), ACCELERATED (6yr)
+  - Direct + indirect job displacement quantification (ILO indirect multiplier: 2.8× for coal)
+  - Reskilling capacity gap analysis and uncovered worker estimation
+  - Full transition cost calculation (USD/worker by scenario) vs existing commitments
+  - Funding gap calculation with community-level precision
+  - GDP shock estimation using coal GDP share × speed multiplier × GDP multiplier
+  - Year-by-year linear job displacement schedule
+  - Composite vulnerability scoring (CRITICAL/HIGH/MEDIUM/LOW) across 4 sub-dimensions
+  - Automated risk flags: economic concentration, reskilling gaps, funding shortfalls
+  - Actionable recommendations tailored to vulnerability level and scenario
+  - Portfolio-level summary across multiple communities
+  - `compare_scenarios()` for side-by-side GRADUAL/MODERATE/ACCELERATED comparison
+- Unit tests: 12 new tests in `tests/test_just_transition_assessor.py`
+
 ## [1.4.0] - 2026-03-25
 
 ### Added
