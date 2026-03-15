@@ -143,3 +143,100 @@ class EnergyTransitionPlanner:
             else:
                 rows.append({"metric": k, "value": v})
         return pd.DataFrame(rows)
+
+    def calculate_stranded_asset_risk(
+        self,
+        asset_book_value_usd: float,
+        remaining_life_years: int,
+        coal_demand_decline_pct_annual: float = 3.0,
+        carbon_price_usd_per_tco2: float = 30.0,
+        annual_emissions_tco2: float = 0.0,
+    ) -> dict:
+        """
+        Estimate stranded asset risk for coal infrastructure under energy transition.
+
+        Calculates expected loss from early retirement forced by declining coal
+        demand and rising carbon prices using a discounted cash-flow approach.
+
+        Args:
+            asset_book_value_usd: Current book value of coal asset (USD)
+            remaining_life_years: Economic life remaining (years)
+            coal_demand_decline_pct_annual: Annual decline rate in coal demand, default 3%
+            carbon_price_usd_per_tco2: Carbon price (USD/tCO2), default $30
+            annual_emissions_tco2: Annual Scope 1+2 emissions (tCO2), default 0
+
+        Returns:
+            Dict with stranded_value_usd, stranding_year, risk_score (0-100),
+            carbon_liability_usd, and transition_urgency band
+
+        Raises:
+            ValueError: If asset_book_value_usd <= 0 or remaining_life_years < 1
+
+        Example:
+            >>> planner = EnergyTransitionPlanner()
+            >>> risk = planner.calculate_stranded_asset_risk(
+            ...     asset_book_value_usd=500_000_000,
+            ...     remaining_life_years=20,
+            ...     coal_demand_decline_pct_annual=4.0,
+            ... )
+            >>> print(f"Stranding year: {risk['stranding_year']}")
+        """
+        if asset_book_value_usd <= 0:
+            raise ValueError("asset_book_value_usd must be positive")
+        if remaining_life_years < 1:
+            raise ValueError("remaining_life_years must be at least 1")
+        if not (0 <= coal_demand_decline_pct_annual <= 30):
+            raise ValueError("coal_demand_decline_pct_annual must be 0–30")
+
+        # Model annual revenue decline from demand erosion
+        stranding_threshold = 0.30  # Below 30% of current value → stranded
+        annual_rate = coal_demand_decline_pct_annual / 100
+
+        stranding_year = None
+        cumulative_value = asset_book_value_usd
+        for year in range(1, remaining_life_years + 1):
+            cumulative_value *= (1 - annual_rate)
+            if cumulative_value / asset_book_value_usd <= stranding_threshold:
+                stranding_year = year
+                break
+
+        # Carbon liability: NPV of future carbon costs
+        carbon_liability = 0.0
+        if annual_emissions_tco2 > 0:
+            for year in range(1, remaining_life_years + 1):
+                # Carbon price escalates 5% annually
+                escalated_price = carbon_price_usd_per_tco2 * (1.05 ** year)
+                carbon_liability += annual_emissions_tco2 * escalated_price / (1.08 ** year)
+
+        # Stranded value = book value less recoverable proceeds
+        effective_life = stranding_year if stranding_year else remaining_life_years
+        stranded_value = asset_book_value_usd * (
+            (remaining_life_years - effective_life) / remaining_life_years
+        )
+
+        # Risk score (0–100)
+        demand_score = min(60, coal_demand_decline_pct_annual * 10)
+        carbon_score = min(25, (carbon_price_usd_per_tco2 / 100) * 25)
+        life_score = min(15, (remaining_life_years / 30) * 15)
+        risk_score = demand_score + carbon_score + life_score
+
+        # Urgency band
+        if risk_score >= 70:
+            urgency = "critical"
+        elif risk_score >= 50:
+            urgency = "high"
+        elif risk_score >= 30:
+            urgency = "moderate"
+        else:
+            urgency = "low"
+
+        return {
+            "asset_book_value_usd": asset_book_value_usd,
+            "stranded_value_usd": round(stranded_value, 0),
+            "stranding_year": stranding_year,
+            "carbon_liability_npv_usd": round(carbon_liability, 0),
+            "total_transition_risk_usd": round(stranded_value + carbon_liability, 0),
+            "risk_score": round(risk_score, 1),
+            "transition_urgency": urgency,
+            "effective_asset_life_years": effective_life,
+        }

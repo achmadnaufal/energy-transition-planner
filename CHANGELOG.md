@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0] - 2026-03-15
+
+### Added
+- **Stranded Asset Risk Calculator** — `calculate_stranded_asset_risk()`: Estimates financial exposure from early coal asset retirement using demand-decline modelling and carbon liability NPV; returns stranding year, risk score (0–100), and transition urgency band
+- **Unit Tests** — 8 new tests in `tests/test_stranded_asset.py` covering decline scenarios, carbon liability, validation errors, and urgency bands
+- **README** — Added stranded asset risk usage example with sample output
+
 ## [1.1.0] - 2026-03-11
 
 ### Added
